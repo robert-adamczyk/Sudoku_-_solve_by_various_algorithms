@@ -5,7 +5,8 @@ import timeit
 
 def check_that_number_fit_trial_and_error(grid, horizontally, perpendicularly, check_number):
     """
-    The function used to check a number that matches the given place for trial and error
+    The function used to check a number that matches the given place
+    for trial and error in compliance with the basic rules
     :param grid: sudoku to solve
     :param horizontally: place position on the horizontal axis
     :param perpendicularly: place position on the perpendicularly axis
@@ -88,9 +89,10 @@ def check_that_number_fit_deduction(grid, x_square_number, y_square_number, chec
     return
 
 
-def trial_and_error_method_solve(grid):
+def trial_and_error_method_solve(grid, debug):
     """
-    Trial and error method is used to solve sudoku
+    Trial and error method with basic rules is used to solve sudoku
+    :param debug: show count details
     :param grid: sudoku to solve
     :return:
     """
@@ -102,17 +104,19 @@ def trial_and_error_method_solve(grid):
                 for check_number in range(1, 10):
                     if check_that_number_fit_trial_and_error(grid, horizontally, perpendicularly, check_number):
                         grid[horizontally][perpendicularly] = check_number
-                        trial_and_error_method_solve(grid)
+                        trial_and_error_method_solve(grid, debug)
                         # When function get stuck
                         grid[horizontally][perpendicularly] = 0
                 return
-    print(np.matrix(grid))
+    if debug:
+        print(np.matrix(grid))
 
 
-def deduction_solve(grid):
+def deduction_solve(grid, debug):
     """
     Deduction method is used to solve sudoku
     Deduction method get stuck when in sudoku not exist place where only one number fit
+    :param debug: show count details
     :param grid: sudoku to solve
     :return: True if method solve sudoku and false id can't
     """
@@ -123,23 +127,26 @@ def deduction_solve(grid):
         if len(fill_number_list) >= 2:
             # check that deduction method get stuck
             if fill_number_list[-1] == fill_number_list[-2]:
-                print("deduction method can't solve this problem")
+                if debug:
+                    print("deduction method can't solve this problem")
                 break
         for x_square_number in range(0, 3):
             for y_square_number in range(0, 3):
                 for check_number in range(1, 10):
                     check_that_number_fit_deduction(grid, x_square_number, y_square_number, check_number)
-    print(np.matrix(grid))
+    if debug:
+        print(np.matrix(grid))
     if np.count_nonzero(grid) == every_possible_position_in_grid:
         return True
     return False
 
 
-def deduction_and_trial_and_error_solve(grid):
+def deduction_and_trial_and_error_solve(grid, debug):
     """
     Deduction and if deduction method fail trial and error method is used to solve sudoku
     Deduction method get stuck when in sudoku not exist place where only one number fit.
-    If that happen to continue solve sudoku get used trial and error method
+    If that happen to continue solve sudoku get used trial and error method with basic rules
+    :param debug: show count details
     :param grid: sudoku to solve
     :return:
     """
@@ -152,7 +159,8 @@ def deduction_and_trial_and_error_solve(grid):
         if len(fill_number_list) >= 2:
             # check that deduction method get stuck
             if fill_number_list[-1] == fill_number_list[-2]:
-                print("deduction method can't solve this problem and change on trail and error method")
+                if debug:
+                    print("deduction method can't solve this problem and change on trail and error method")
                 break
         for x_square_number in range(0, 3):
             for y_square_number in range(0, 3):
@@ -167,10 +175,12 @@ def deduction_and_trial_and_error_solve(grid):
                 for check_number in range(1, 10):
                     if check_that_number_fit_trial_and_error(grid, horizontally, perpendicularly, check_number):
                         grid[horizontally][perpendicularly] = check_number
-                        trial_and_error_method_solve(grid)
+                        trial_and_error_method_solve(grid, debug)
                         # When function get stuck
                         grid[horizontally][perpendicularly] = 0
                 return
+    if debug:
+        print(np.matrix(grid))
 
 
 def get_sudoku(sudoku_difficult_level):
@@ -220,8 +230,9 @@ def get_sudoku(sudoku_difficult_level):
         return grid
 
 
-def check_performance_for_methods(sudoku_difficult_level):
+def check_performance_for_methods(sudoku_difficult_level, debug=False):
     """
+    :param debug: check count details
     :param sudoku_difficult_level:
     1 - easy
     2 - medium
@@ -242,23 +253,24 @@ def check_performance_for_methods(sudoku_difficult_level):
         grid = get_sudoku(sudoku_difficult_level)
 
         start_time = timeit.default_timer()
-        trial_and_error_method_solve(grid)
+        trial_and_error_method_solve(grid, debug)
         end_time = timeit.default_timer()
         function_trial_and_error.append(end_time-start_time)
 
         start_time = timeit.default_timer()
-        deduction_and_trial_and_error_solve(grid)
+        deduction_and_trial_and_error_solve(grid, debug)
         end_time = timeit.default_timer()
         function_deduction_and_trial_and_error.append(end_time-start_time)
 
         start_time = timeit.default_timer()
-        if deduction_solve(grid):
+        if deduction_solve(grid, debug):
             end_time = timeit.default_timer()
             function_deduction.append(end_time-start_time)
 
-    print('function_trial_and_error:', function_trial_and_error)
-    print('function_deduction_and_trial_and_error:', function_deduction_and_trial_and_error)
-    print('function_deduction', function_deduction)
+    if debug:
+        print('function_trial_and_error:', function_trial_and_error)
+        print('function_deduction_and_trial_and_error:', function_deduction_and_trial_and_error)
+        print('function_deduction', function_deduction)
 
     font = {'family': 'Arial',
             'weight': 'normal',
@@ -277,5 +289,5 @@ def check_performance_for_methods(sudoku_difficult_level):
     plt.show()
 
 
-check_performance_for_methods(4)
+check_performance_for_methods(1, debug=False)
 
